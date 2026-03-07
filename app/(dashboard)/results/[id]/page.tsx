@@ -30,7 +30,7 @@ export default async function ResultsPage({
 
   if (!review) notFound();
 
-  const items: FeedbackItem[] = review.feedback_items || [];
+  const items: FeedbackItem[] = review.feedback_items || review.feedbackItems || [];
   const sorted = [...items].sort(
     (a, b) =>
       SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity)
@@ -42,19 +42,19 @@ export default async function ResultsPage({
   }, {} as Record<Severity, number>);
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="max-w-4xl w-full">
       {/* Back */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-2 text-text-muted hover:text-text-primary text-sm mb-8 transition-colors"
+        className="inline-flex items-center gap-2 text-text-muted hover:text-text-primary text-sm mb-6 md:mb-8 transition-colors"
       >
         ← Back to dashboard
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-8 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 md:mb-8">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="text-xs font-mono bg-surface border border-border px-3 py-1 rounded-full text-text-muted uppercase">
               {review.type} review
             </span>
@@ -62,12 +62,12 @@ export default async function ResultsPage({
               {formatDate(review.created_at)}
             </span>
           </div>
-          <p className="font-mono text-sm text-text-muted truncate">{review.input}</p>
+          <p className="font-mono text-xs md:text-sm text-text-muted break-all">{review.input}</p>
         </div>
 
-        <div className="shrink-0 text-right">
+        <div className="shrink-0 sm:text-right">
           <p className="text-xs font-mono text-text-muted mb-1">SCORE</p>
-          <div className={`font-display font-bold text-5xl ${getScoreColor(review.score)}`}>
+          <div className={`font-display font-bold text-4xl md:text-5xl ${getScoreColor(review.score)}`}>
             {review.score}
           </div>
           <p className={`text-xs font-mono mt-1 ${getScoreColor(review.score)}`}>
@@ -77,17 +77,18 @@ export default async function ResultsPage({
       </div>
 
       {/* Summary */}
-      <div className="border border-border bg-surface rounded-2xl p-6 mb-6">
+      <div className="border border-border bg-surface rounded-2xl p-4 md:p-6 mb-5 md:mb-6">
         <p className="text-xs font-mono text-text-muted mb-2">AI SUMMARY</p>
-        <p className="text-text-primary leading-relaxed">{review.summary}</p>
+        <p className="text-text-primary leading-relaxed text-sm md:text-base">{review.summary}</p>
       </div>
 
       {/* Severity breakdown */}
-      <div className="grid grid-cols-5 gap-2 mb-8">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6 md:mb-8">
         {SEVERITY_ORDER.map((sev) => (
-          <div key={sev} className={`border rounded-xl p-3 text-center ${SEVERITY_STYLES[sev]}`}>
-            <div className="font-display font-bold text-2xl">{counts[sev]}</div>
-            <div className="text-xs font-mono mt-0.5 uppercase opacity-80">{sev}</div>
+          <div key={sev} className={`border rounded-xl p-2 md:p-3 text-center ${SEVERITY_STYLES[sev]}`}>
+            <div className="font-display font-bold text-xl md:text-2xl">{counts[sev]}</div>
+            <div className="text-xs font-mono mt-0.5 uppercase opacity-80 hidden sm:block">{sev}</div>
+            <div className="text-xs font-mono mt-0.5 uppercase opacity-80 sm:hidden">{sev.slice(0, 4)}</div>
           </div>
         ))}
       </div>
@@ -95,58 +96,67 @@ export default async function ResultsPage({
       {/* Feedback items */}
       <div>
         <h2 className="font-display font-semibold text-lg mb-4">
-          {items.length} Issues Found
+          {items.length} Issue{items.length !== 1 ? "s" : ""} Found
         </h2>
-        <div className="space-y-3">
-          {sorted.map((item) => (
-            <div
-              key={item.id}
-              className="border border-border bg-surface rounded-2xl p-5 hover:border-muted transition-colors"
-            >
-              <div className="flex items-start gap-3 mb-3">
-                <span
-                  className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border shrink-0 ${SEVERITY_STYLES[item.severity]}`}
-                >
-                  {item.severity.toUpperCase()}
-                </span>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-text-primary">{item.title}</h3>
-                  <span className="text-xs text-text-muted font-mono">{item.category}</span>
-                  {item.element && (
-                    <span className="text-xs font-mono bg-bg border border-border px-2 py-0.5 rounded ml-2 text-text-muted">
-                      {item.element}
-                    </span>
-                  )}
-                  {item.line && (
-                    <span className="text-xs font-mono bg-bg border border-border px-2 py-0.5 rounded ml-2 text-text-muted">
-                      Line {item.line}
-                    </span>
-                  )}
+
+        {items.length === 0 ? (
+          <div className="border border-dashed border-border rounded-2xl p-10 text-center">
+            <div className="text-4xl mb-3">🎉</div>
+            <h3 className="font-display font-semibold text-lg mb-2">No issues found!</h3>
+            <p className="text-text-muted text-sm">Your code looks clean. Great work!</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {sorted.map((item) => (
+              <div
+                key={item.id}
+                className="border border-border bg-surface rounded-2xl p-4 md:p-5 hover:border-muted transition-colors"
+              >
+                <div className="flex flex-wrap items-start gap-2 md:gap-3 mb-3">
+                  <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border shrink-0 ${SEVERITY_STYLES[item.severity]}`}>
+                    {item.severity.toUpperCase()}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-text-primary text-sm md:text-base">{item.title}</h3>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className="text-xs text-text-muted font-mono">{item.category}</span>
+                      {item.element && (
+                        <span className="text-xs font-mono bg-bg border border-border px-2 py-0.5 rounded text-text-muted">
+                          {item.element}
+                        </span>
+                      )}
+                      {item.line && (
+                        <span className="text-xs font-mono bg-bg border border-border px-2 py-0.5 rounded text-text-muted">
+                          Line {item.line}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-text-muted text-sm leading-relaxed mb-3">
+                  {item.description}
+                </p>
+                <div className="bg-bg border border-border rounded-xl px-3 md:px-4 py-3">
+                  <p className="text-xs font-mono text-accent mb-1">FIX</p>
+                  <p className="text-text-primary text-sm">{item.suggestion}</p>
                 </div>
               </div>
-              <p className="text-text-muted text-sm leading-relaxed mb-3">
-                {item.description}
-              </p>
-              <div className="bg-bg border border-border rounded-xl px-4 py-3">
-                <p className="text-xs font-mono text-accent mb-1">FIX</p>
-                <p className="text-text-primary text-sm">{item.suggestion}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Actions */}
-      <div className="mt-8 flex gap-4">
+      <div className="mt-8 flex flex-col sm:flex-row gap-3">
         <Link
           href="/review"
-          className="bg-accent text-bg font-display font-semibold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-opacity"
+          className="text-center bg-accent text-bg font-display font-semibold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-opacity"
         >
           + New Review
         </Link>
         <Link
           href="/dashboard"
-          className="border border-border text-text-muted px-6 py-3 rounded-xl text-sm hover:border-muted hover:text-text-primary transition-colors"
+          className="text-center border border-border text-text-muted px-6 py-3 rounded-xl text-sm hover:border-muted hover:text-text-primary transition-colors"
         >
           Back to dashboard
         </Link>
