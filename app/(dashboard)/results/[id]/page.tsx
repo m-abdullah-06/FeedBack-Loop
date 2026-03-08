@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { FeedbackItem, Severity } from "@/types";
+import { Severity } from "@/types";
 import { formatDate, getScoreColor, getScoreLabel } from "@/lib/utils";
 
 const SEVERITY_ORDER: Severity[] = ["critical", "high", "medium", "low", "info"];
@@ -30,10 +30,9 @@ export default async function ResultsPage({
 
   if (!review) notFound();
 
-  const items: FeedbackItem[] = review.feedback_items || review.feedbackItems || [];
+  const items: any[] = review.feedback_items || review.feedbackItems || [];
   const sorted = [...items].sort(
-    (a, b) =>
-      SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity)
+    (a, b) => SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity)
   );
 
   const counts = SEVERITY_ORDER.reduce((acc, sev) => {
@@ -41,26 +40,33 @@ export default async function ResultsPage({
     return acc;
   }, {} as Record<Severity, number>);
 
+  const isPro = review.plan_used === "pro";
+  const isDeveloperOrPro = review.plan_used === "developer" || review.plan_used === "pro";
+
   return (
     <div className="max-w-4xl w-full">
       {/* Back */}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-2 text-text-muted hover:text-text-primary text-sm mb-6 md:mb-8 transition-colors"
-      >
+      <Link href="/dashboard" className="inline-flex items-center gap-2 text-text-muted hover:text-text-primary text-sm mb-6 transition-colors">
         ← Back to dashboard
       </Link>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 md:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="text-xs font-mono bg-surface border border-border px-3 py-1 rounded-full text-text-muted uppercase">
               {review.type} review
             </span>
-            <span className="text-xs text-text-muted font-mono">
-              {formatDate(review.created_at)}
-            </span>
+            {review.plan_used && (
+              <span className={`text-xs font-mono px-3 py-1 rounded-full border ${
+                isPro ? "bg-accent/10 text-accent border-accent/20"
+                : isDeveloperOrPro ? "bg-severity-info/10 text-severity-info border-severity-info/20"
+                : "bg-surface text-text-muted border-border"
+              }`}>
+                {review.plan_used?.toUpperCase()} ANALYSIS
+              </span>
+            )}
+            <span className="text-xs text-text-muted font-mono">{formatDate(review.created_at)}</span>
           </div>
           <p className="font-mono text-xs md:text-sm text-text-muted break-all">{review.input}</p>
         </div>
@@ -77,13 +83,21 @@ export default async function ResultsPage({
       </div>
 
       {/* Summary */}
-      <div className="border border-border bg-surface rounded-2xl p-4 md:p-6 mb-5 md:mb-6">
+      <div className="border border-border bg-surface rounded-2xl p-4 md:p-6 mb-5">
         <p className="text-xs font-mono text-text-muted mb-2">AI SUMMARY</p>
         <p className="text-text-primary leading-relaxed text-sm md:text-base">{review.summary}</p>
       </div>
 
+      {/* JS render badge for developer/pro */}
+      {isDeveloperOrPro && review.type === "url" && (
+        <div className="border border-severity-info/20 bg-severity-info/5 rounded-xl px-4 py-3 mb-5 flex items-center gap-2 text-sm text-severity-info">
+          <span>⚡</span>
+          <span>Full JavaScript rendering — React, Next.js, and dynamic content was analyzed.</span>
+        </div>
+      )}
+
       {/* Severity breakdown */}
-      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6 md:mb-8">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6">
         {SEVERITY_ORDER.map((sev) => (
           <div key={sev} className={`border rounded-xl p-2 md:p-3 text-center ${SEVERITY_STYLES[sev]}`}>
             <div className="font-display font-bold text-xl md:text-2xl">{counts[sev]}</div>
@@ -108,10 +122,8 @@ export default async function ResultsPage({
         ) : (
           <div className="space-y-3">
             {sorted.map((item) => (
-              <div
-                key={item.id}
-                className="border border-border bg-surface rounded-2xl p-4 md:p-5 hover:border-muted transition-colors"
-              >
+              <div key={item.id} className="border border-border bg-surface rounded-2xl p-4 md:p-5 hover:border-muted transition-colors">
+                {/* Title row */}
                 <div className="flex flex-wrap items-start gap-2 md:gap-3 mb-3">
                   <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border shrink-0 ${SEVERITY_STYLES[item.severity]}`}>
                     {item.severity.toUpperCase()}
@@ -133,13 +145,31 @@ export default async function ResultsPage({
                     </div>
                   </div>
                 </div>
-                <p className="text-text-muted text-sm leading-relaxed mb-3">
-                  {item.description}
-                </p>
-                <div className="bg-bg border border-border rounded-xl px-3 md:px-4 py-3">
+
+                {/* Description */}
+                <p className="text-text-muted text-sm leading-relaxed mb-3">{item.description}</p>
+
+                {/* Fix */}
+                <div className="bg-bg border border-border rounded-xl px-3 md:px-4 py-3 mb-2">
                   <p className="text-xs font-mono text-accent mb-1">FIX</p>
                   <p className="text-text-primary text-sm">{item.suggestion}</p>
                 </div>
+
+                {/* WordPress fix — Pro only */}
+                {isPro && item.wordpressFix && (
+                  <div className="bg-bg border border-accent/20 rounded-xl px-3 md:px-4 py-3 mb-2">
+                    <p className="text-xs font-mono text-accent mb-1">📋 WORDPRESS FIX</p>
+                    <p className="text-text-primary text-sm">{item.wordpressFix}</p>
+                  </div>
+                )}
+
+                {/* Plugin recommendation — Pro only */}
+                {isPro && item.plugin && (
+                  <div className="bg-bg border border-severity-info/20 rounded-xl px-3 md:px-4 py-3">
+                    <p className="text-xs font-mono text-severity-info mb-1">🔌 RECOMMENDED PLUGIN</p>
+                    <p className="text-text-primary text-sm font-medium">{item.plugin}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -148,16 +178,10 @@ export default async function ResultsPage({
 
       {/* Actions */}
       <div className="mt-8 flex flex-col sm:flex-row gap-3">
-        <Link
-          href="/review"
-          className="text-center bg-accent text-bg font-display font-semibold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-opacity"
-        >
+        <Link href="/review" className="text-center bg-accent text-bg font-display font-semibold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-opacity">
           + New Review
         </Link>
-        <Link
-          href="/dashboard"
-          className="text-center border border-border text-text-muted px-6 py-3 rounded-xl text-sm hover:border-muted hover:text-text-primary transition-colors"
-        >
+        <Link href="/dashboard" className="text-center border border-border text-text-muted px-6 py-3 rounded-xl text-sm hover:border-muted hover:text-text-primary transition-colors">
           Back to dashboard
         </Link>
       </div>
