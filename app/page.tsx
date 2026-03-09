@@ -375,11 +375,16 @@ export default function LandingPage() {
 
       {/* ── Footer ── */}
       <footer className="border-t border-border px-4 md:px-6 py-6 md:py-8">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-text-muted text-xs md:text-sm">
-          <div className="font-display font-bold text-base">feedback<span className="text-accent">loop</span></div>
-          <p>Built with Next.js · Groq AI · Supabase</p>
-        </div>
-      </footer>
+  <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-text-muted text-xs md:text-sm">
+    <div className="font-display font-bold text-base">feedback<span className="text-accent">loop</span></div>
+    <div className="flex flex-wrap gap-4 justify-center">
+      <Link href="/pricing" className="hover:text-text-primary transition-colors">Pricing</Link>
+      <Link href="/privacy" className="hover:text-text-primary transition-colors">Privacy Policy</Link>
+      <Link href="/terms" className="hover:text-text-primary transition-colors">Terms of Service</Link>
+    </div>
+    <p>Built with Next.js · Groq AI · Supabase</p>
+  </div>
+</footer>
 
     </div>
   );
