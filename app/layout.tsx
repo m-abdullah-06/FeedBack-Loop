@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   description:
     "Get instant AI-powered feedback on your website URLs and code. Identify UX issues, performance bottlenecks, security vulnerabilities, and more.",
   keywords: ["code review", "UX review", "AI feedback", "developer tools"],
+  verification: {
+    google: "J0HjDfdCbV9fjHZCfziwLaLasyWpiz548jBxFKn9lw8",
+  },
 };
 
 export default function RootLayout({
