@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     // Get or create profile
     let { data: profile } = await supabase
       .from("profiles")
-      .select("plan, reviews_used, reviews_limit")
+      .select("plan, reviews_used, reviews_limit, pro_expires_at")
       .eq("id", user.id)
       .single();
 
@@ -26,6 +26,19 @@ export async function POST(req: NextRequest) {
         .select()
         .single();
       profile = newProfile;
+    }
+
+    // Check if early bird Pro trial has expired
+    if (profile?.pro_expires_at && profile.plan === "pro") {
+      const expired = new Date(profile.pro_expires_at) < new Date();
+      if (expired) {
+        await supabase
+          .from("profiles")
+          .update({ plan: "free", reviews_limit: 5 })
+          .eq("id", user.id);
+        profile.plan = "free";
+        profile.reviews_limit = 5;
+      }
     }
 
     // Check usage limit
