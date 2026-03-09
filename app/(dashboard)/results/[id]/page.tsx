@@ -125,7 +125,7 @@ export default async function ResultsPage({
               <div key={item.id} className="border border-border bg-surface rounded-2xl p-4 md:p-5 hover:border-muted transition-colors">
                 {/* Title row */}
                 <div className="flex flex-wrap items-start gap-2 md:gap-3 mb-3">
-                  <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border shrink-0 ${SEVERITY_STYLES[item.severity]}`}>
+                  <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border shrink-0 ${SEVERITY_STYLES[item.severity as Severity] ?? ""}`}>
                     {item.severity.toUpperCase()}
                   </span>
                   <div className="flex-1 min-w-0">
