@@ -10,7 +10,14 @@ Analyze the provided HTML source code and return structured feedback.
 Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
 {
   "summary": "2-3 sentence overview",
-  "score": <0-100>,
+  "score": <0-100 overall score>,
+  "categoryScores": {
+    "seo": <0-100>,
+    "performance": <0-100>,
+    "security": <0-100>,
+    "accessibility": <0-100>,
+    "ux": <0-100>
+  },
   "feedbackItems": [
     {
       "id": "f1",
@@ -24,6 +31,7 @@ Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
   ]
 }
 
+Category scores must reflect the actual issues found in each category.
 Base feedback ONLY on what you see in the HTML. Do NOT invent issues. Aim for 6-12 items.`;
 
 const DEVELOPER_SYSTEM_PROMPT = `You are FeedbackLoop, an expert web reviewer.
@@ -32,7 +40,14 @@ Analyze the provided fully-rendered HTML (including JavaScript-generated content
 Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
 {
   "summary": "2-3 sentence overview",
-  "score": <0-100>,
+  "score": <0-100 overall score>,
+  "categoryScores": {
+    "seo": <0-100>,
+    "performance": <0-100>,
+    "security": <0-100>,
+    "accessibility": <0-100>,
+    "ux": <0-100>
+  },
   "feedbackItems": [
     {
       "id": "f1",
@@ -46,21 +61,24 @@ Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
   ]
 }
 
+Category scores must reflect the actual issues found in each category.
 This is fully rendered HTML so you can analyze React/Next.js/Vue apps properly.
 Base feedback ONLY on what you see. Do NOT invent issues. Aim for 6-12 items.`;
 
-const PRO_SYSTEM_PROMPT = `You are FeedbackLoop, an expert web reviewer for both technical and non-technical users.
+const PRO_SYSTEM_PROMPT = `You are FeedbackLoop, an expert web reviewer specializing in WordPress and non-technical users.
 Analyze the provided fully-rendered HTML and return structured feedback with beginner-friendly fix instructions.
-
-First, detect what platform the site is built on by looking for clues in the HTML:
-- WordPress: look for wp-content, wp-includes, wp-json, or <meta name="generator" content="WordPress">
-- React/Next.js: look for __NEXT_DATA__, _next/, or react root divs
-- Other: everything else
 
 Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
 {
   "summary": "2-3 sentence overview in plain English, no jargon",
-  "score": <0-100>,
+  "score": <0-100 overall score>,
+  "categoryScores": {
+    "seo": <0-100>,
+    "performance": <0-100>,
+    "security": <0-100>,
+    "accessibility": <0-100>,
+    "ux": <0-100>
+  },
   "feedbackItems": [
     {
       "id": "f1",
@@ -76,6 +94,7 @@ Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
   ]
 }
 
+Category scores must reflect the actual issues found in each category.
 CRITICAL RULES:
 - wordpressFix and plugin fields MUST be completely omitted for React, Next.js, Vue, or any non-WordPress site
 - Only include wordpressFix and plugin when you find wp-content or wp-includes in the HTML
@@ -88,7 +107,14 @@ Analyze the provided code and return structured feedback.
 Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
 {
   "summary": "2-3 sentence overview",
-  "score": <0-100>,
+  "score": <0-100 overall score>,
+  "categoryScores": {
+    "seo": null,
+    "performance": <0-100>,
+    "security": <0-100>,
+    "accessibility": null,
+    "ux": null
+  },
   "feedbackItems": [
     {
       "id": "f1",
@@ -152,7 +178,6 @@ async function fetchBasicHTML(url: string): Promise<string> {
 }
 
 function truncateHTML(html: string): string {
-  // Strip tags that waste tokens but have zero review value
   let cleaned = html
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
@@ -161,7 +186,6 @@ function truncateHTML(html: string): string {
     .replace(/\s{2,}/g, " ")
     .trim();
 
-  // Hard cap at 6000 chars to stay within Groq's 12k token limit
   if (cleaned.length <= 6000) return cleaned;
 
   const headMatch = cleaned.match(/<head[\s\S]*?<\/head>/i)?.[0]?.slice(0, 2000) ?? "";
@@ -245,7 +269,13 @@ export async function analyzeWithGroq(
     .replace(/\s*```$/i, "")
     .trim();
 
-  let parsed: { summary: string; score: number; feedbackItems: FeedbackItem[] };
+  let parsed: {
+    summary: string;
+    score: number;
+    categoryScores: Record<string, number | null>;
+    feedbackItems: FeedbackItem[];
+  };
+
   try {
     parsed = JSON.parse(cleaned);
   } catch {
@@ -260,6 +290,7 @@ export async function analyzeWithGroq(
     language: request.language,
     summary: parsed.summary,
     score: Math.min(100, Math.max(0, parsed.score)),
+    categoryScores: parsed.categoryScores || null,
     feedbackItems: parsed.feedbackItems || [],
     createdAt: new Date().toISOString(),
   };

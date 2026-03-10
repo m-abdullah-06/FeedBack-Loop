@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get or create profile
     let { data: profile } = await supabase
       .from("profiles")
       .select("plan, reviews_used, reviews_limit, pro_expires_at")
@@ -41,7 +40,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check usage limit
     if (profile && profile.reviews_used >= profile.reviews_limit) {
       return NextResponse.json(
         { error: "Monthly review limit reached. Upgrade your plan for more reviews." },
@@ -49,7 +47,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse body
     const body: AnalyzeRequest = await req.json();
     const { type, input, language } = body;
 
@@ -57,7 +54,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields: type and input" }, { status: 400 });
     }
 
-    // Input size limit
     if (input.length > 20000) {
       return NextResponse.json({ error: "Input too large. Max 20,000 characters." }, { status: 400 });
     }
@@ -79,7 +75,6 @@ export async function POST(req: NextRequest) {
 
     const result = await analyzeWithGroq({ type, input, language }, plan);
 
-    // Save to Supabase
     const { data: saved, error: saveError } = await supabase
       .from("reviews")
       .insert({
@@ -90,6 +85,7 @@ export async function POST(req: NextRequest) {
         language: result.language,
         summary: result.summary,
         score: result.score,
+        category_scores: result.categoryScores ?? null,
         feedback_items: result.feedbackItems,
         plan_used: plan,
       })
@@ -101,7 +97,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(result);
     }
 
-    // Increment usage
     await supabase
       .from("profiles")
       .update({ reviews_used: (profile?.reviews_used ?? 0) + 1 })

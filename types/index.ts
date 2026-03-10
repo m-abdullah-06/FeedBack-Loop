@@ -16,10 +16,11 @@ export interface FeedbackItem {
 export interface AnalysisResult {
   id: string;
   type: ReviewType;
-  input: string; // URL or code snippet
-  language?: string; // for code reviews
+  input: string;
+  language?: string;
   summary: string;
-  score: number; // 0-100
+  score: number;
+  categoryScores?: Record<string, number | null> | null;
   feedbackItems: FeedbackItem[];
   createdAt: string;
   userId?: string;
