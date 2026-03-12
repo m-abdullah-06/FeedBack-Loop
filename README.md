@@ -1,147 +1,266 @@
-# FeedbackLoop
+<div align="center">
 
-**AI-powered code & UX reviewer. Get instant, structured feedback on your websites and code.**
+<br />
 
-FeedbackLoop analyzes your URL or code snippet and returns severity-rated issues across security, performance, accessibility, UX, and best practices — with specific, actionable fixes for each one.
+```
+  __           _ _                 _     _
+ / _|___  ___ | | |__   __ _  ___| | __| | ___   ___  _ __
+| |_/ _ \/ _ \| | '_ \ / _` |/ __| |/ /| |/ _ \ / _ \| '_ \
+|  _  __/  __/| | |_) | (_| | (__|   < | | (_) | (_) | |_) |
+|_|  \___|\___||_|_.__/ \__,_|\___|_|\_\|_|\___/ \___/| .__/
+                                                        |_|
+```
 
----
+**AI-powered web & code reviewer. Find what's broken in seconds.**
 
-## Features
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com)
+[![Groq](https://img.shields.io/badge/Groq-AI-F55036?style=flat-square)](https://groq.com)
+[![Browserless](https://img.shields.io/badge/Browserless-JS%20Rendering-4A90D9?style=flat-square)](https://browserless.io)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-- **URL Review** — fetches and analyzes real website HTML for UX, SEO, performance, and accessibility issues
-- **Code Review** — deep analysis of code in any language including security vulnerabilities, bad patterns, and optimizations
-- **Severity Scoring** — every issue rated Critical, High, Medium, Low, or Info so you know what to fix first
-- **Overall Score** — 0–100 quality score per review
-- **Review History** — all past reviews saved and accessible from your dashboard
-- **Usage Limits** — free tier with 5 reviews/month, Pro tier with 100/month
-- **Auth & Accounts** — full signup/login with email confirmation via Supabase
+[**Live Demo →**](https://feedbackloopai.vercel.app) · [**Report Bug**](https://github.com/m-abdullah-06/feedbackloop/issues) · [**Request Feature**](https://github.com/m-abdullah-06/feedbackloop/issues)
 
----
+<br />
 
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router, TypeScript) |
-| AI | Groq API — Llama 3.3 70B |
-| Database & Auth | Supabase (Postgres + RLS) |
-| Payments | Stripe (ready to activate) |
-| Styling | Tailwind CSS |
-| Fonts | Syne · DM Sans · JetBrains Mono |
+</div>
 
 ---
 
-## Getting Started
+## 🔍 What is FeedbackLoop?
+
+FeedbackLoop is a full-stack SaaS app that uses AI to analyze websites and code snippets for real issues — scored by severity, with exact fixes you can apply immediately.
+
+Paste a URL or code snippet → get back a structured report with **SEO, Performance, Security, Accessibility, and UX scores** in seconds.
+
+> **For WordPress site owners** — plain English fix guides and plugin recommendations included on the Pro plan. No technical knowledge needed.
+
+> **For developers** — full JavaScript rendering via Browserless means React, Next.js, and Vue apps get properly analyzed, not just their static HTML shell.
+
+---
+
+## ✨ Features
+
+| Feature | Free | Developer | Pro |
+|---|:---:|:---:|:---:|
+| URL & Code Review | ✅ | ✅ | ✅ |
+| Severity Scoring (Critical → Info) | ✅ | ✅ | ✅ |
+| SEO / Performance / Security / Accessibility / UX Scores | ✅ | ✅ | ✅ |
+| Downloadable Score Card | ✅ | ✅ | ✅ |
+| Review History | ✅ | ✅ | ✅ |
+| Full JS Rendering (React / Next.js / Vue) | ❌ | ✅ | ✅ |
+| SPA & Dynamic App Support | ❌ | ✅ | ✅ |
+| WordPress Step-by-Step Fix Guides | ❌ | ❌ | ✅ |
+| Plugin Recommendations | ❌ | ❌ | ✅ |
+| Platform Auto-Detection | ❌ | ❌ | ✅ |
+| Reviews per month | 5 | 30 | 100 |
+
+---
+
+## 🛠️ Tech Stack
+
+```
+Frontend      Next.js 14 (App Router) · React 18 · Tailwind CSS · TypeScript
+Backend       Next.js API Routes · Supabase (Postgres + Auth + RLS)
+AI            Groq API — Llama 3.3 70B (fast + free tier)
+Rendering     Browserless.io — full headless Chrome for JS rendering
+Payments      Lemon Squeezy (subscription billing)
+Hosting       Vercel
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- A [Supabase](https://supabase.com) account
+- A [Groq](https://console.groq.com) API key (free)
+- A [Browserless](https://browserless.io) API key (free tier available)
 
 ### 1. Clone the repo
 
 ```bash
 git clone https://github.com/yourusername/feedbackloop.git
 cd feedbackloop
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
 ```
 
-### 3. Set up environment variables
+### 2. Set up environment variables
 
 ```bash
 cp .env.example .env.local
 ```
 
-Fill in your keys — see the table below.
+Fill in your `.env.local`:
 
-### 4. Set up the database
+```env
+# Groq AI
+GROQ_API_KEY=gsk_xxxxxx
 
-- Create a project at [supabase.com](https://supabase.com)
-- Go to **SQL Editor** and run the contents of `supabase/schema.sql`
-- That's it — tables, triggers, and RLS policies are all created automatically
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
-### 5. Run the dev server
+# Browserless (for Developer/Pro JS rendering)
+BROWSERLESS_API_KEY=your_key
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Lemon Squeezy (payments)
+LEMONSQUEEZY_API_KEY=your_key
+LEMONSQUEEZY_WEBHOOK_SECRET=your_secret
+LEMONSQUEEZY_STORE_ID=your_store_id
+LEMONSQUEEZY_DEVELOPER_VARIANT_ID=your_variant_id
+LEMONSQUEEZY_PRO_VARIANT_ID=your_variant_id
+```
+
+### 3. Set up the database
+
+Run the SQL in `supabase/schema.sql` in your Supabase SQL Editor.
+
+### 4. Run the dev server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000) 🎉
 
 ---
 
-## Environment Variables
-
-| Variable | Where to get it |
-|---|---|
-| `GROQ_API_KEY` | [console.groq.com](https://console.groq.com) — free |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API |
-| `STRIPE_SECRET_KEY` | Stripe Dashboard |
-| `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard |
-| `STRIPE_PRO_MONTHLY_PRICE_ID` | Stripe → Product catalog |
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` for local dev |
-
-> Stripe is optional for local development. The app works fully without it.
-
----
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 feedbackloop/
 ├── app/
 │   ├── (auth)/
-│   │   ├── login/              # Login page
-│   │   └── signup/             # Signup page
+│   │   ├── login/page.tsx
+│   │   ├── signup/page.tsx
+│   │   ├── forgot-password/page.tsx
+│   │   └── reset-password/page.tsx
 │   ├── (dashboard)/
-│   │   ├── layout.tsx          # Sidebar layout
-│   │   ├── dashboard/          # Review history + usage stats
-│   │   ├── review/             # Submit new review
-│   │   └── results/[id]/       # View review results
+│   │   ├── layout.tsx
+│   │   ├── dashboard/page.tsx
+│   │   ├── review/page.tsx
+│   │   └── results/[id]/page.tsx
 │   ├── api/
-│   │   ├── analyze/            # Main AI analysis endpoint
-│   │   ├── auth/signout/       # Sign out route
-│   │   └── stripe/webhook/     # Stripe billing webhook
-│   ├── pricing/                # Pricing page
-│   ├── page.tsx                # Landing page
-│   └── globals.css
+│   │   ├── analyze/route.ts       ← main AI analysis endpoint
+│   │   ├── preview/route.ts       ← public preview (no auth)
+│   │   └── lemonsqueezy/
+│   │       └── webhook/route.ts   ← payment webhook
+│   ├── pricing/page.tsx
+│   ├── privacy/page.tsx
+│   ├── terms/page.tsx
+│   ├── page.tsx                   ← landing page
+│   └── layout.tsx
 ├── lib/
-│   ├── groq.ts                 # Groq AI integration + HTML fetcher
-│   ├── supabase.ts             # Client-side Supabase
-│   ├── supabase-server.ts      # Server-side Supabase
-│   ├── stripe.ts               # Stripe + plan config
-│   └── utils.ts                # Helpers
-├── types/
-│   └── index.ts                # Shared TypeScript types
-├── supabase/
-│   └── schema.sql              # Full DB schema — run this in Supabase
-└── .env.example                # Environment variable template
+│   ├── groq.ts                    ← AI + HTML fetcher + prompts
+│   ├── supabase.ts
+│   ├── supabase-server.ts
+│   └── utils.ts
+├── types/index.ts
+├── middleware.ts                   ← rate limiting
+├── supabase/schema.sql
+└── .env.example
 ```
 
 ---
 
-## Plans
+## 🧠 How the AI Analysis Works
 
-| Plan | Reviews / month | Price |
+```
+User submits URL
+       │
+       ▼
+  Free plan?  ──yes──▶  Basic HTML fetch (fast)
+       │
+       no
+       │
+       ▼
+Developer/Pro ──────▶  Browserless headless Chrome
+                        (full JS render, waits 2s)
+       │
+       ▼
+  Strip scripts/styles/SVGs to minimize tokens
+       │
+       ▼
+  Send to Groq (Llama 3.3 70B)
+  with plan-specific system prompt
+       │
+       ▼
+  Free/Dev: standard feedback
+  Pro: + WordPress fix guides + plugin recommendations
+       │
+       ▼
+  Parse JSON response
+  Save to Supabase
+  Return to client
+```
+
+---
+
+## 🔐 Security
+
+- Row Level Security (RLS) on all Supabase tables
+- Users can only access their own reviews
+- SSRF protection on URL fetcher
+- Input size limits (20k chars max)
+- Rate limiting middleware (10 req/min per IP)
+- Environment variables never exposed to client
+
+---
+
+## 🌍 Deployment
+
+### Deploy to Vercel
+
+1. Push to GitHub
+2. Import repo on [vercel.com](https://vercel.com)
+3. Add all environment variables
+4. Deploy
+
+### After deploying
+
+Update Supabase Auth settings:
+- **Site URL** → `https://your-domain.vercel.app`
+- **Redirect URLs** → `https://your-domain.vercel.app/**`
+
+---
+
+## 📊 Plans & Pricing
+
+| Plan | Price | Reviews/month |
 |---|---|---|
-| Free | 5 | $0 |
-| Pro | 100 | $19 / month |
+| Free | $0 | 5 |
+| Developer | $9/mo | 30 |
+| Pro | $19/mo | 100 |
+
+> 🎉 **Early Bird** — First 100 users get Pro free for 3 months automatically on signup.
 
 ---
 
-## How It Works
+## 🤝 Contributing
 
-1. User submits a URL or code snippet
-2. If URL — the server fetches the real HTML source of the website
-3. The HTML or code is sent to Groq's Llama 3.3 70B model with a structured prompt
-4. The model returns JSON with a score, summary, and list of feedback items
-5. Results are saved to Supabase and displayed with severity ratings and fix suggestions
+Pull requests are welcome! For major changes please open an issue first.
+
+1. Fork the repo
+2. Create your branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ---
 
-## License
 
-MIT
+<div align="center">
+
+Built by **Muhammad Abdullah** · [feedbackloopai.vercel.app](https://feedbackloopai.vercel.app)
+
+⭐ Star this repo if you found it useful!
+
+</div>
