@@ -2,6 +2,28 @@ import { AnalysisResult, AnalyzeRequest, FeedbackItem } from "@/types";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
+// ─── Shared accuracy rules injected into every prompt ───────────────────────
+
+const ACCURACY_RULES = `
+CRITICAL ACCURACY RULES — follow these strictly:
+- Do NOT flag HTTPS as missing if the URL provided starts with https://
+- Do NOT flag multiple CSS files as an issue if the site uses Next.js, React, Vite, or any modern framework — bundled CSS is expected and optimized
+- Do NOT flag missing favicon if you cannot confirm it is actually missing from the HTML head
+- Do NOT flag issues you cannot directly confirm from the HTML provided
+- Do NOT invent or assume issues that are not visible in the HTML
+- Only flag an issue if you are confident it exists based on what you can see
+- If unsure whether something is an issue, skip it entirely
+- Modern frameworks like Next.js handle many performance optimizations automatically — do not flag them as issues
+- Modern frameworks like Next.js handle many performance optimizations automatically — do not flag them as issues
+- Do NOT flag WordPress itself as a security issue — it is a legitimate and widely used CMS
+- Do NOT flag WordPress login page (/wp-admin) as a security issue unless you see actual evidence of vulnerability
+- Do NOT flag WordPress plugins as issues unless you can confirm they are outdated or insecure from the HTML
+- Do NOT flag WordPress theme files as issues unless you see actual problems in the HTML
+- Do NOT flag RSS feeds or WordPress specific meta tags as issues — they are normal and expected
+- Do NOT flag WordPress comment forms as security issues — they are standard WordPress functionality
+- Only flag WordPress specific issues if they represent a real confirmed problem visible in the HTML
+`;
+
 // ─── Prompts ────────────────────────────────────────────────────────────────
 
 const FREE_SYSTEM_PROMPT = `You are FeedbackLoop, an expert web reviewer.
@@ -32,7 +54,8 @@ Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
 }
 
 Category scores must reflect the actual issues found in each category.
-Base feedback ONLY on what you see in the HTML. Do NOT invent issues. Aim for 6-12 items.`;
+Base feedback ONLY on what you see in the HTML. Aim for 6-12 items.
+${ACCURACY_RULES}`;
 
 const DEVELOPER_SYSTEM_PROMPT = `You are FeedbackLoop, an expert web reviewer.
 Analyze the provided fully-rendered HTML (including JavaScript-generated content) and return structured feedback.
@@ -63,7 +86,8 @@ Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
 
 Category scores must reflect the actual issues found in each category.
 This is fully rendered HTML so you can analyze React/Next.js/Vue apps properly.
-Base feedback ONLY on what you see. Do NOT invent issues. Aim for 6-12 items.`;
+Base feedback ONLY on what you see. Aim for 6-12 items.
+${ACCURACY_RULES}`;
 
 const PRO_SYSTEM_PROMPT = `You are FeedbackLoop, an expert web reviewer specializing in WordPress and non-technical users.
 Analyze the provided fully-rendered HTML and return structured feedback with beginner-friendly fix instructions.
@@ -99,7 +123,8 @@ CRITICAL RULES:
 - wordpressFix and plugin fields MUST be completely omitted for React, Next.js, Vue, or any non-WordPress site
 - Only include wordpressFix and plugin when you find wp-content or wp-includes in the HTML
 - Write as if explaining to someone who has never touched code
-- Base feedback ONLY on what you see in the HTML. Aim for 6-12 items.`;
+- Base feedback ONLY on what you see in the HTML. Aim for 6-12 items.
+${ACCURACY_RULES}`;
 
 const CODE_SYSTEM_PROMPT = `You are FeedbackLoop, an expert code reviewer.
 Analyze the provided code and return structured feedback.
@@ -128,7 +153,8 @@ Respond ONLY with raw JSON — no markdown, no backticks, no preamble:
   ]
 }
 
-Be specific, technical, and actionable. Aim for 6-12 items.`;
+Be specific, technical, and actionable. Aim for 6-12 items.
+${ACCURACY_RULES}`;
 
 // ─── Fetchers ────────────────────────────────────────────────────────────────
 
@@ -258,7 +284,14 @@ export async function analyzeWithGroq(
       ? DEVELOPER_SYSTEM_PROMPT
       : FREE_SYSTEM_PROMPT;
 
-    userMessage = `Review this website (URL: ${request.input}) based on its HTML source:\n\n\`\`\`html\n${html}\n\`\`\``;
+    // Pass HTTPS context explicitly so AI never flags it as missing
+    const isHttps = request.input.startsWith("https://");
+    userMessage = `Review this website (URL: ${request.input}) based on its HTML source.
+Note: This site is ${isHttps ? "already on HTTPS — do NOT flag HTTPS as missing or insecure" : "not on HTTPS — this is a real issue worth flagging"}.
+
+\`\`\`html
+${html}
+\`\`\``;
   }
 
   const rawText = await callGroq(systemPrompt, userMessage);
