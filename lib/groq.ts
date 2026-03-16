@@ -15,6 +15,9 @@ CRITICAL ACCURACY RULES — follow these strictly:
 - If unsure whether something is an issue, skip it entirely
 - Modern frameworks like Next.js handle many performance optimizations automatically — do not flag them as issues
 - Modern frameworks like Next.js handle many performance optimizations automatically — do not flag them as issues
+- Do NOT flag Next.js static CSS files like /_next/static/css/*.css as having unused CSS — you cannot see inside these files and Next.js automatically purges unused CSS during build
+- Do NOT flag any /_next/ files as issues — these are automatically optimized by Next.js during build
+- Do NOT make assumptions about file contents you cannot actually read
 - Do NOT flag WordPress itself as a security issue — it is a legitimate and widely used CMS
 - Do NOT flag WordPress login page (/wp-admin) as a security issue unless you see actual evidence of vulnerability
 - Do NOT flag WordPress plugins as issues unless you can confirm they are outdated or insecure from the HTML
