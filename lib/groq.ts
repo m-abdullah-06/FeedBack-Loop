@@ -6,25 +6,41 @@ const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const ACCURACY_RULES = `
 CRITICAL ACCURACY RULES — follow these strictly:
+
+HTTPS & SECURITY:
 - Do NOT flag HTTPS as missing if the URL provided starts with https://
-- Do NOT flag multiple CSS files as an issue if the site uses Next.js, React, Vite, or any modern framework — bundled CSS is expected and optimized
+- Do NOT flag video links as HTTP unless you can see actual http:// in the src attribute
+- Do NOT flag WordPress itself as a security issue
+- Do NOT flag wp-admin as a security issue unless there is clear evidence of vulnerability
+- Do NOT flag WordPress plugins as issues unless you can confirm they are outdated from the HTML
+- Do NOT flag WordPress theme files as issues unless you see actual problems in the HTML
+- Do NOT flag RSS feeds or WordPress meta tags as issues — they are normal and expected
+- Do NOT flag WordPress comment forms as security issues — they are standard functionality
+
+CSS & PERFORMANCE:
+- Do NOT flag multiple CSS files on Next.js, React, Vite or any modern framework
+- Do NOT flag /_next/ static files as issues — Next.js optimizes these automatically
+- Do NOT flag Next.js CSS files like /_next/static/css/*.css as having unused CSS — you cannot see inside these files
+- Do NOT flag image optimization unless you can confirm oversized images from the HTML
+- Do NOT assume images need compression — you cannot see file sizes from HTML
+
+VIDEOS:
+- Do NOT flag missing captions unless you confirm there is no <track> element inside the <video> tag
+- Do NOT flag video HTTP links unless you see explicit http:// in the src attribute
+
+HEADER TAGS:
+- Do NOT flag missing header tags if you can see H1, H2, or H3 elements anywhere in the HTML
+
+FAVICON:
 - Do NOT flag missing favicon if you cannot confirm it is actually missing from the HTML head
+
+GENERAL:
 - Do NOT flag issues you cannot directly confirm from the HTML provided
 - Do NOT invent or assume issues that are not visible in the HTML
-- Only flag an issue if you are confident it exists based on what you can see
+- Only flag an issue if you are 100% confident it exists based on what you can see
 - If unsure whether something is an issue, skip it entirely
-- Modern frameworks like Next.js handle many performance optimizations automatically — do not flag them as issues
-- Modern frameworks like Next.js handle many performance optimizations automatically — do not flag them as issues
-- Do NOT flag Next.js static CSS files like /_next/static/css/*.css as having unused CSS — you cannot see inside these files and Next.js automatically purges unused CSS during build
-- Do NOT flag any /_next/ files as issues — these are automatically optimized by Next.js during build
-- Do NOT make assumptions about file contents you cannot actually read
-- Do NOT flag WordPress itself as a security issue — it is a legitimate and widely used CMS
-- Do NOT flag WordPress login page (/wp-admin) as a security issue unless you see actual evidence of vulnerability
-- Do NOT flag WordPress plugins as issues unless you can confirm they are outdated or insecure from the HTML
-- Do NOT flag WordPress theme files as issues unless you see actual problems in the HTML
-- Do NOT flag RSS feeds or WordPress specific meta tags as issues — they are normal and expected
-- Do NOT flag WordPress comment forms as security issues — they are standard WordPress functionality
-- Only flag WordPress specific issues if they represent a real confirmed problem visible in the HTML
+- Modern frameworks handle many optimizations automatically — do not flag them
+- Do NOT make assumptions about file contents you cannot read
 `;
 
 // ─── Prompts ────────────────────────────────────────────────────────────────
