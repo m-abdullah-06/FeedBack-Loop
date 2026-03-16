@@ -30,11 +30,14 @@ function getScoreColorHex(score: number): string {
   return "#ef4444";
 }
 
+
+
 export default function ResultsPage() {
   const { id } = useParams();
   const [review, setReview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const [sharecopied, setShareCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -50,6 +53,13 @@ export default function ResultsPage() {
     }
     load();
   }, [id]);
+
+  async function handleShare() {
+  const shareUrl = `${window.location.origin}/share/${review.id}`;
+  await navigator.clipboard.writeText(shareUrl);
+  setShareCopied(true);
+  setTimeout(() => setShareCopied(false), 2000);
+}
 
   async function handleDownloadCard() {
     if (!cardRef.current || !review) return;
@@ -273,6 +283,12 @@ export default function ResultsPage() {
         <Link href="/review" className="text-center bg-accent text-bg font-display font-semibold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-opacity">
           + New Review
         </Link>
+        <button
+  onClick={handleShare}
+  className="text-center border border-border text-text-muted font-display font-semibold px-6 py-3 rounded-xl text-sm hover:border-accent hover:text-accent transition-colors flex items-center justify-center gap-2"
+>
+  {sharecopied ? "✓ Link copied!" : "🔗 Share Report"}
+</button>
         <button
           onClick={handleDownloadCard}
           disabled={downloading}
