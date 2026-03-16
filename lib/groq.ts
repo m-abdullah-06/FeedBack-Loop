@@ -16,6 +16,9 @@ HTTPS & SECURITY:
 - Do NOT flag WordPress theme files as issues unless you see actual problems in the HTML
 - Do NOT flag RSS feeds or WordPress meta tags as issues — they are normal and expected
 - Do NOT flag WordPress comment forms as security issues — they are standard functionality
+- Do NOT flag CSRF tokens in HTML as a security issue — 
+  they are intentionally placed in HTML by frameworks like 
+  Flask, Django, Laravel and Rails. This is expected and correct behavior.
 
 CSS & PERFORMANCE:
 - Do NOT flag multiple CSS files on Next.js, React, Vite or any modern framework
